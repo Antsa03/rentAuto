@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Utilisateur {
+  id_utilisateur Int      @id @default(autoincrement())
+  photo_profil   String   @default("user.png") @db.Text
+  nom            String   @db.Text
+  prenom         String   @db.Text
+  genre          String   @db.VarChar(1)
+  adresse        String   @db.Text
+  telephone      String   @db.Text
+  email          String   @unique @db.Text
+  password       String   @db.Text
+  isAdmin        Boolean  @default(false)
+  Client         Client[]
+}
+
+model Client {
+  id_client          Int         @id @default(autoincrement())
+  id_utilisateur     Int
+  permis_de_conduire String      @db.Text
+  num_cin            String      @db.Text
+  date_de_naissance  DateTime    @db.Date
+  utilisateur        Utilisateur @relation(fields: [id_utilisateur], references: [id_utilisateur], onDelete: Cascade, onUpdate: Cascade)
+  Location           Location[]
+}
+
+model Vehicule {
+  immatriculation String     @id
+  image_vehicule  String     @db.Text
+  marque          String     @db.Text
+  modele          String     @db.Text
+  annee           Int        @db.Integer
+  kilometrage     Int
+  carburant       String     @db.Text
+  nbr_place       Int        @db.Integer @default(0)
+  categorie       String     @db.Text
+  prix_par_jour   Float
+  disponible      Boolean    @default(true)
+  Location        Location[]
+}
+
+model Location {
+  id_location     Int      @id @default(autoincrement())
+  id_client       Int
+  immatriculation String   @db.Text
+  date_debut      DateTime @db.Date
+  date_fin        DateTime @db.Date
+  prix_total      Decimal
+  client          Client   @relation(fields: [id_client], references: [id_client])
+  vehicule        Vehicule @relation(fields: [immatriculation], references: [immatriculation], onDelete: Cascade, onUpdate: Cascade)
+}
